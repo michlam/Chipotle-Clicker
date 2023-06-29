@@ -5,9 +5,15 @@ import java.awt.event.ActionListener;
 
 public class ChipotleMain {
     JLabel counterLabel, perSecLabel;
+    JButton button1, button2, button3, button4;
     int chipotleCounter;
+    int timerSpeed;
+    double perSecondAdd;
+    int perClickAdd;
+    boolean timerOn;
     Font font1, font2;
     ChipotleHandler cHandler = new ChipotleHandler();
+    Timer timer;
 
     public static void main(String[] args) {
         new ChipotleMain();
@@ -16,6 +22,9 @@ public class ChipotleMain {
 
     public ChipotleMain(){
         chipotleCounter = 0;
+        perClickAdd = 1;
+        timerOn = false;
+        perSecondAdd = 0;
 
         createFont();
         createUI();
@@ -29,8 +38,8 @@ public class ChipotleMain {
 
     public void createUI(){
         // Create a black window with given width and height.
-        int WINDOW_WIDTH = 800;
-        int WINDOW_HEIGHT = 600;
+        int WINDOW_WIDTH = 1200;
+        int WINDOW_HEIGHT = 800;
 
         JFrame window = new JFrame();
         window.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -52,6 +61,7 @@ public class ChipotleMain {
         chipotleButton.setBorder(null);
         chipotleButton.setIcon(chipotle);
         chipotleButton.addActionListener(cHandler); // Handles what happens when clicked
+        chipotleButton.setActionCommand("chipotle");
         chipotlePanel.add(chipotleButton);
 
         // Add the count tracker and per second tracker
@@ -71,16 +81,91 @@ public class ChipotleMain {
         perSecLabel.setFont(font2);
         counterPanel.add(perSecLabel);
 
+
+        // Panels for power-ups
+        JPanel itemPanel = new JPanel();
+        itemPanel.setBounds(700, 170, 250, 250);
+        itemPanel.setBackground(Color.black);
+        itemPanel.setLayout(new GridLayout(4, 1));
+        window.add(itemPanel);
+
+        button1 = new JButton("Cooks");
+        button1.setFont(font1);
+        button1.setFocusPainted(false);
+        button1.addActionListener(cHandler);
+        button1.setActionCommand("Cooks");
+        itemPanel.add(button1);
+
+        button2 = new JButton("?");
+        button2.setFont(font1);
+        button2.setFocusPainted(false);
+        button2.addActionListener(cHandler);
+        button2.setActionCommand("Cursor");
+        itemPanel.add(button2);
+
+        button3 = new JButton("?");
+        button3.setFont(font1);
+        button3.setFocusPainted(false);
+        button3.addActionListener(cHandler);
+        button3.setActionCommand("Cursor");
+        itemPanel.add(button3);
+
+        button4 = new JButton("?");
+        button4.setFont(font1);
+        button4.setFocusPainted(false);
+        button4.addActionListener(cHandler);
+        button4.setActionCommand("Cursor");
+        itemPanel.add(button4);
+
         window.setVisible(true);
+
+    }
+
+    public void setTimer() {
+
+        timer = new Timer(timerSpeed, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                chipotleCounter++;
+                counterLabel.setText(chipotleCounter + " burritos");
+            }
+        });
+    }
+
+    public void timerUpdate() {
+        if(!timerOn) {
+            timerOn = true;
+        } else {
+            timer.stop();
+        }
+
+        double speed = 1/perSecondAdd*1000;
+        timerSpeed = (int)Math.round(speed);
+
+        String s = String.format("%.1f", perSecondAdd);
+        perSecLabel.setText("per second: " + s);
+
+        setTimer();
+        timer.start();
 
     }
 
     public class ChipotleHandler implements ActionListener {
 
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent event) {
 
-            chipotleCounter++;
-            counterLabel.setText(chipotleCounter + " burritos");
+            String action = event.getActionCommand();
+
+            switch(action) {
+                case "chipotle":
+                    chipotleCounter += perClickAdd;
+                    counterLabel.setText(chipotleCounter + " burritos");
+                    break;
+                case "Cooks":
+                    perSecondAdd += 0.1;
+                    timerUpdate();
+            }
         }
     }
 }
