@@ -2,18 +2,26 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class ChipotleMain {
     JLabel counterLabel, perSecLabel;
     JButton button1, button2, button3, button4;
     int chipotleCounter;
     int timerSpeed;
+    int cooksNumber, cooksPrice;
     double perSecondAdd;
     int perClickAdd;
     boolean timerOn;
     Font font1, font2;
     ChipotleHandler cHandler = new ChipotleHandler();
     Timer timer;
+    JTextArea messageText;
+    MouseHandler mHandler = new MouseHandler();
+    boolean bowenUnlocked;
+    int bowenNumber;
+    int bowenPrice;
 
     public static void main(String[] args) {
         new ChipotleMain();
@@ -22,9 +30,14 @@ public class ChipotleMain {
 
     public ChipotleMain(){
         chipotleCounter = 0;
-        perClickAdd = 1;
+        perClickAdd = 10;
         timerOn = false;
         perSecondAdd = 0;
+        cooksNumber = 0;
+        cooksPrice = 10;
+        bowenUnlocked = false;
+        bowenNumber = 0;
+        bowenPrice = 100;
 
         createFont();
         createUI();
@@ -84,7 +97,7 @@ public class ChipotleMain {
 
         // Panels for power-ups
         JPanel itemPanel = new JPanel();
-        itemPanel.setBounds(700, 170, 250, 250);
+        itemPanel.setBounds(700, 250, 250, 250);
         itemPanel.setBackground(Color.black);
         itemPanel.setLayout(new GridLayout(4, 1));
         window.add(itemPanel);
@@ -93,6 +106,7 @@ public class ChipotleMain {
         button1.setFont(font1);
         button1.setFocusPainted(false);
         button1.addActionListener(cHandler);
+        button1.addMouseListener(mHandler);
         button1.setActionCommand("Cooks");
         itemPanel.add(button1);
 
@@ -100,7 +114,8 @@ public class ChipotleMain {
         button2.setFont(font1);
         button2.setFocusPainted(false);
         button2.addActionListener(cHandler);
-        button2.setActionCommand("Cursor");
+        button2.setActionCommand("Bowen");
+        button2.addMouseListener(mHandler);
         itemPanel.add(button2);
 
         button3 = new JButton("?");
@@ -108,6 +123,7 @@ public class ChipotleMain {
         button3.setFocusPainted(false);
         button3.addActionListener(cHandler);
         button3.setActionCommand("Cursor");
+        button3.addMouseListener(mHandler);
         itemPanel.add(button3);
 
         button4 = new JButton("?");
@@ -115,7 +131,27 @@ public class ChipotleMain {
         button4.setFocusPainted(false);
         button4.addActionListener(cHandler);
         button4.setActionCommand("Cursor");
+        button4.addMouseListener(mHandler);
         itemPanel.add(button4);
+
+
+        // itemPanel.setBounds(700, 170, 250, 250);
+
+        JPanel descPanel = new JPanel();
+        descPanel.setBounds(700, 120, 250, 150);
+        descPanel.setBackground(Color.black);
+        window.add(descPanel);
+
+        messageText = new JTextArea();
+        messageText.setBounds(700, 120, 250, 150);
+        messageText.setForeground(Color.white);
+        messageText.setBackground(Color.black);
+        messageText.setFont(font2);
+        messageText.setLineWrap(true);
+        messageText.setWrapStyleWord(true);
+        messageText.setEditable(false);
+        descPanel.add(messageText);
+
 
         window.setVisible(true);
 
@@ -126,9 +162,16 @@ public class ChipotleMain {
         timer = new Timer(timerSpeed, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 chipotleCounter++;
                 counterLabel.setText(chipotleCounter + " burritos");
+
+
+                if (!bowenUnlocked) {
+                    if (chipotleCounter >= 100) {
+                        bowenUnlocked = true;
+                        button2.setText("Bowen " + "(" + bowenNumber + ")");
+                    }
+                }
             }
         });
     }
@@ -163,9 +206,91 @@ public class ChipotleMain {
                     counterLabel.setText(chipotleCounter + " burritos");
                     break;
                 case "Cooks":
-                    perSecondAdd += 0.1;
-                    timerUpdate();
+                    if (chipotleCounter >= cooksPrice) {
+                        chipotleCounter -= cooksPrice;
+                        cooksPrice += 5;
+                        counterLabel.setText(chipotleCounter + " burritos");
+
+                        cooksNumber++;
+                        button1.setText("Cooks " + "(" + cooksNumber + ")");
+                        messageText.setText("Cook\n[price: " + cooksPrice + " ]\nAuto clicks once every 10 seconds");
+
+                        perSecondAdd += 0.1;
+                        timerUpdate();
+
+                    } else {
+                        // Not enough burritos to buy
+                        messageText.setText("You need more burritos!");
+                    }
+                    break;
+                case "Bowen":
+                    if (chipotleCounter >= bowenPrice) {
+                        chipotleCounter -= bowenPrice;
+                        bowenPrice += 25;
+                        counterLabel.setText(chipotleCounter + " burritos");
+
+                        bowenNumber++;
+                        button2.setText("Bowens " + "(" + bowenNumber + ")");
+                        messageText.setText("Bowen\n[price: " + bowenPrice + " ]\nAuto clicks once every second");
+
+                        perSecondAdd += 1;
+                        timerUpdate();
+
+                    } else {
+                        // Not enough burritos to buy
+                        messageText.setText("You need more burritos!");
+                    }
+                    break;
             }
+        }
+    }
+
+
+
+    public class MouseHandler implements MouseListener {
+
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            // Determines which button the mouse is on.
+            JButton button = (JButton)e.getSource();
+
+            if (button == button1) {
+                messageText.setText("Cook\n[price: " + cooksPrice + " ]\nAuto clicks once every 10 seconds");
+            } else if (button == button2) {
+                if (!bowenUnlocked) {
+                    messageText.setText("This item is currently locked!");
+                } else {
+                    messageText.setText("Bowen\n[price: " + bowenPrice + " ]\nAuto clicks once every second");
+                }
+            } else if (button == button3) {
+                messageText.setText("This item is currently locked!");
+            } else if (button == button4) {
+                messageText.setText("This item is currently locked!");
+            }
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            // JButton button = (JButton)e.getSource();
+
+            messageText.setText(null);
+
         }
     }
 }
