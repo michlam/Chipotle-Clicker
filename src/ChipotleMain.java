@@ -30,7 +30,7 @@ public class ChipotleMain {
 
     public ChipotleMain(){
         chipotleCounter = 0;
-        perClickAdd = 10;
+        perClickAdd = 1;
         timerOn = false;
         perSecondAdd = 0;
         cooksNumber = 0;
